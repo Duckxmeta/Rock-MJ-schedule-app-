@@ -3,262 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock-MJ Schedule</title>
-    <!-- Tailwind CSS for styling -->
+    <title>Rock-MJ Schedule Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js for lightweight, reactive frontend logic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex justify-center antialiased">
+<body class="bg-gradient-to-br from-[#0f172a] via-[#020617] to-[#1e1b4b] text-slate-100 min-h-screen flex justify-center antialiased p-0 sm:p-4">
 
-    <!-- Main Container (Max width simulates a mobile screen layout) -->
-    <div x-data="appState()" class="w-full max-w-md bg-slate-800 shadow-2xl min-h-screen flex flex-col justify-between border-x border-slate-700">
+    <div x-data="appState()" class="w-full max-w-md bg-slate-900/40 backdrop-blur-xl shadow-2xl min-h-screen sm:min-h-[850px] sm:rounded-3xl flex flex-col justify-between border border-white/10 overflow-hidden relative">
         
-        <!-- TOP HEADER & ROLE SWITCHER -->
-        <header class="bg-slate-950 p-4 border-b border-slate-700 sticky top-0 z-10">
-            <div class="flex justify-between items-center mb-3">
-                <h1 class="text-xl font-bold tracking-tight text-emerald-400">Rock-MJ Scheduler</h1>
-                <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded border border-slate-700" x-text="currentDateString"></span>
+        <div class="absolute top-[-10%] left-[-20%] w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-[20%] right-[-20%] w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <header class="bg-slate-950/70 backdrop-blur-md p-5 border-b border-white/5 sticky top-0 z-20 space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Rock-MJ Hub</h1>
+                    <p class="text-[11px] font-medium text-emerald-400/80 uppercase tracking-widest mt-0.5" x-text="role === 'manager' ? '⚡ Manager Command' : '👥 Staff Portal'"></p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-slate-300 font-medium" x-text="currentDateString"></span>
+                </div>
             </div>
             
-            <!-- Toggle between Employee view and Manager view -->
-            <div class="grid grid-cols-2 gap-2 bg-slate-900 p-1 rounded-lg border border-slate-700 text-sm">
-                <button @click="role = 'employee'" :class="role === 'employee' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400'" class="py-1.5 rounded-md transition-all">
+            <div class="grid grid-cols-2 gap-1 bg-black/40 p-1 rounded-xl border border-white/5 text-xs font-semibold relative">
+                <button @click="role = 'employee'" :class="role === 'employee' ? 'bg-white/10 text-white shadow-lg shadow-black/20 border border-white/10' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition-all duration-200">
                     Employee View
                 </button>
-                <button @click="role = 'manager'" :class="role === 'manager' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400'" class="py-1.5 rounded-md transition-all">
-                    Manager Mode
+                <button @click="role = 'manager'" :class="role === 'manager' ? 'bg-white/10 text-white shadow-lg shadow-black/20 border border-white/10' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition-all duration-200">
+                    Rock & MJ Mode
                 </button>
             </div>
         </header>
 
-        <!-- HORIZONTAL 7-DAY ROLLING CALENDAR RIBBON -->
-        <section class="bg-slate-950/50 p-3 border-b border-slate-800">
-            <div class="flex justify-between gap-1 overflow-x-auto pb-1 scrollbar-none">
+        <section class="bg-black/20 p-4 border-b border-white/5 space-y-3">
+            <div class="flex justify-between items-center">
+                <button @click="shiftWeek(-7)" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-slate-300 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider" x-text="getWeekRangeLabel()"></span>
+                <button @click="shiftWeek(7)" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-slate-300 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+
+            <div class="flex justify-between gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 <template x-for="day in weekDays" :key="day.dateStr">
                     <button @click="selectedDate = day.dateStr" 
-                            :class="selectedDate === day.dateStr ? 'bg-emerald-500 text-slate-950 font-bold transform scale-105' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'"
-                            class="flex flex-col items-center flex-1 py-2 px-1 rounded-lg border border-slate-800 transition-all text-center min-w-[48px]">
-                        <span class="text-[10px] uppercase tracking-wider opacity-70" x-text="day.name"></span>
-                        <span class="text-base font-semibold" x-text="day.dayNum"></span>
+                            :class="selectedDate === day.dateStr ? 'bg-gradient-to-b from-white/15 to-white/5 text-emerald-400 border-emerald-500/50 shadow-xl shadow-emerald-950/20' : 'bg-white/[0.02] text-slate-400 border-white/5 hover:bg-white/5'"
+                            class="flex flex-col items-center flex-1 py-2.5 px-1 rounded-xl border transition-all duration-200 text-center min-w-[48px]">
+                        <span class="text-[9px] font-bold uppercase tracking-widest opacity-60 mb-0.5" x-text="day.name"></span>
+                        <span class="text-base font-bold" x-text="day.dayNum"></span>
                     </button>
                 </template>
             </div>
         </section>
 
-        <!-- MAIN UTILITY DISPLAY -->
-        <main class="flex-1 p-4 overflow-y-auto space-y-4">
+        <main class="flex-1 p-4 overflow-y-auto space-y-5 z-10">
             
-            <!-- SECTION: SHIFTS FOR SELECTED DAY -->
             <div>
-                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2" x-text="'Shifts for ' + formatDisplayDate(selectedDate)"></h2>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest" x-text="'Roster: ' + formatDisplayDate(selectedDate)"></h2>
+                    <span class="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full font-medium" x-text="filteredShifts.length + ' active'"></span class="text-xs">
+                </div>
                 
-                <div class="space-y-2">
-                    <!-- Dynamic rendering of active shifts -->
+                <div class="space-y-2.5">
                     <template x-for="shift in filteredShifts" :key="shift.id">
-                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center transition-all">
+                        <div :class="shift.role.includes('❌') ? 'border-rose-500/20 bg-rose-950/10' : 'border-white/5 bg-white/[0.03]'" class="p-3.5 rounded-2xl border backdrop-blur-md flex justify-between items-center transition-all duration-200 hover:border-white/10">
                             <div>
-                                <p class="font-semibold text-slate-100" x-text="shift.employeeName"></p>
-                                <p class="text-xs text-slate-400" x-text="shift.role"></p>
+                                <p class="font-semibold text-white tracking-wide" x-text="shift.employeeName"></p>
+                                <p class="text-xs text-slate-400 mt-0.5 font-medium" x-text="shift.role"></p>
                             </div>
                             <div class="text-right">
-                                <span class="text-sm font-medium bg-slate-800 px-2.5 py-1 rounded-md text-emerald-400 border border-slate-700" x-text="shift.time"></span>
+                                <span :class="shift.role.includes('❌') ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'" class="text-xs font-semibold px-3 py-1.5 rounded-xl border" x-text="shift.time"></span>
                             </div>
                         </div>
                     </template>
 
-                    <!-- Fallback UI if zero shifts are scheduled -->
                     <template x-if="filteredShifts.length === 0">
-                        <div class="text-center py-6 bg-slate-900/50 rounded-xl border border-dashed border-slate-800 text-slate-500 text-sm">
-                            No scheduled shifts for this day.
+                        <div class="text-center py-8 bg-white/[0.01] rounded-2xl border border-dashed border-white/5 text-slate-500 text-xs tracking-wide">
+                            No schedules posted for this date.
                         </div>
                     </template>
                 </div>
             </div>
 
-            <!-- SECTION: TIME OFF REQUESTS (CONTEXT AWARE) -->
-            <div class="pt-2 border-t border-slate-800">
+            <div class="pt-3 border-t border-white/5">
                 
-                <!-- IF EMPLOYEE: Simple Day Off Submission Form -->
                 <template x-if="role === 'employee'">
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h3 class="text-sm font-bold text-slate-200">Submit Day Off Request</h3>
-                        <div class="space-y-2 text-sm">
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">Select Target Date:</label>
-                                <input type="date" x-model="newRequestDate" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+                    <div class="bg-white/[0.02] border border-white/5 p-4 rounded-2xl space-y-4 shadow-inner">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-200">Request Time Off</h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Submit single or advanced dates directly into Rock & MJ's feed.</p>
+                        </div>
+                        <div class="space-y-3 text-xs">
+                            <div class="grid grid-cols-1 gap-1">
+                                <label class="text-slate-400 font-medium pl-0.5">Target Date</label>
+                                <input type="date" x-model="newRequestDate" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500/50 text-sm">
                             </div>
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">Reason / Note:</label>
-                                <input type="text" x-model="newRequestNote" placeholder="Doctor appointment, vacation, etc." class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                            <div class="grid grid-cols-1 gap-1">
+                                <label class="text-slate-400 font-medium pl-0.5">Reason / Leave Custom Note</label>
+                                <input type="text" x-model="newRequestNote" placeholder="e.g. Vacation planning, family event" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 text-sm">
                             </div>
-                            <button @click="submitLeaveRequest" class="w-full bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg hover:bg-emerald-400 transition-colors text-center mt-2">
-                                Submit Request
+                            <button @click="submitLeaveRequest" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold py-3 rounded-xl hover:opacity-90 active:scale-[0.99] transition-all text-sm shadow-lg shadow-emerald-950/40 mt-1">
+                                Send to Management Feed
                             </button>
                         </div>
                     </div>
                 </template>
 
-                <!-- IF MANAGER: Dashboard Review Stack (Like Deputy swipe layout) -->
                 <template x-if="role === 'manager'">
-                    <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Pending Leave Approvals</h3>
-                        <div class="space-y-2">
-                            <template x-for="req in pendingRequests" :key="req.id">
-                                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl space-y-3">
-                                    <div class="flex justify-between items-start text-sm">
-                                        <div>
-                                            <p class="font-bold text-slate-200" x-text="req.employeeName"></p>
-                                            <p class="text-xs text-slate-400" x-text="'Requested Date: ' + formatDisplayDate(req.date)"></p>
-                                            <p class="text-xs text-slate-400 italic mt-1" x-text="'&ldquo;' + req.note + '&rdquo;'"></p>
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2 text-xs">
-                                        <button @click="resolveRequest(req.id, 'Denied')" class="bg-slate-800 border border-rose-900/50 text-rose-400 py-1.5 rounded-lg hover:bg-rose-950/30 transition-colors">
-                                            Deny
-                                        </button>
-                                        <button @click="resolveRequest(req.id, 'Approved')" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 py-1.5 rounded-lg hover:bg-emerald-500/20 font-semibold transition-colors">
-                                            Approve
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <template x-if="pendingRequests.length === 0">
-                                <div class="text-center py-4 text-xs text-slate-500">
-                                    All clear! No pending time-off requests.
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-
-            </div>
-        </main>
-
-        <!-- FOOTER SUMMARY CARDS -->
-        <footer class="bg-slate-950 p-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
-            <div>
-                Active View: <span class="text-emerald-400 font-bold uppercase" x-text="role"></span>
-            </div>
-            <div class="text-slate-500">
-                Rock-MJ Engine &bull; Pure Utility
-            </div>
-        </footer>
-    </div>
-
-    <!-- UTILITY APPLICATION STATE & INTERACTIVE LOGIC -->
-    <script>
-        function appState() {
-            return {
-                // Core States
-                role: 'employee', // 'employee' or 'manager'
-                selectedDate: '', // Set programmatically on load
-                currentDateString: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                
-                // Form Fields
-                newRequestDate: '',
-                newRequestNote: '',
-
-                // Mock Data Arrays (Acts as the active database state)
-                shifts: [
-                    { id: 1, employeeName: 'Alex Rivers', date: '', role: 'Floor Supervisor', time: '8:00 AM - 4:00 PM' },
-                    { id: 2, employeeName: 'Jordan Taylor', date: '', role: 'Customer Success', time: '10:00 AM - 6:00 PM' },
-                    { id: 3, employeeName: 'Casey Morgan', date: '', role: 'Inventory Tech', time: '1:00 PM - 9:00 PM' }
-                ],
-                
-                leaveRequests: [
-                    { id: 101, employeeName: 'Jordan Taylor', date: '', note: 'Dentist appointment in morning', status: 'Pending' }
-                ],
-
-                // Initialize relative dates dynamically so the app is always functional relative to current day
-                init() {
-                    const today = new Date();
-                    this.selectedDate = today.toISOString().split('T')[0];
-                    
-                    // Assign default dynamic dates to sample data
-                    this.shifts.forEach((s, idx) => {
-                        const target = new Date();
-                        target.setDate(today.getDate() + (idx % 2)); // Alternates between today and tomorrow
-                        s.date = target.toISOString().split('T')[0];
-                    });
-                    
-                    const dayAfterTomorrow = new Date();
-                    dayAfterTomorrow.setDate(today.getDate() + 2);
-                    this.leaveRequests[0].date = dayAfterTomorrow.toISOString().split('T')[0];
-                },
-
-                // Generate array of 7 consecutive days starting from today
-                get weekDays() {
-                    const days = [];
-                    const options = { weekday: 'short' };
-                    for (let i = 0; i < 7; i++) {
-                        const d = new Date();
-                        d.setDate(d.getDate() + i);
-                        days.push({
-                            name: d.toLocaleDateString('en-US', options),
-                            dayNum: d.getDate(),
-                            dateStr: d.toISOString().split('T')[0]
-                        });
-                    }
-                    return days;
-                },
-
-                // Filter shifts list based on active horizontal calendar selection
-                get filteredShifts() {
-                    return this.shifts.filter(s => s.date === this.selectedDate);
-                },
-
-                // Filter leave items waiting review
-                get pendingRequests() {
-                    return this.leaveRequests.filter(r => r.status === 'Pending');
-                },
-
-                // Employee submissions
-                submitLeaveRequest() {
-                    if (!this.newRequestDate) return alert('Please pick a valid date.');
-                    
-                    this.leaveRequests.push({
-                        id: Date.now(),
-                        employeeName: 'Current User',
-                        date: this.newRequestDate,
-                        note: this.newRequestNote || 'No note provided',
-                        status: 'Pending'
-                    });
-
-                    alert('Request submitted to manager dashboard dashboard!');
-                    this.newRequestDate = '';
-                    this.newRequestNote = '';
-                },
-
-                // Manager interaction handler
-                resolveRequest(requestId, decision) {
-                    const target = this.leaveRequests.find(r => r.id === requestId);
-                    if (target) {
-                        target.status = decision;
+                    <div class="space-y-5">
                         
-                        // If approved, dynamically inject an interactive placeholder warning shift block 
-                        if (decision === 'Approved') {
-                            this.shifts.push({
-                                id: Date.now(),
-                                employeeName: target.employeeName,
-                                date: target.date,
-                                role: '❌ UNAVAILABLE',
-                                time: 'Approved Day Off'
-                            });
-                        }
-                    }
-                },
-
-                // Formatting utilities
-                formatDisplayDate(dateStr) {
-                    if (!dateStr) return '';
-                    const parts = dateStr.split('-');
-                    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-                    return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                        <div class="bg-white/[0.02] border border-white/5 p-4 rounded-2xl space-y-3.5">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-200">Create & Assign a Shift</h3>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Draft shifts instantly for any selected day or future
