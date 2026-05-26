@@ -149,7 +149,7 @@
                                 <button @click="lockManagerMode" class="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-md font-medium">Log Out Admin</button>
                             </div>
                             <div class="flex gap-2">
-                                <input type="text" x-model="newEmployeeName" placeholder="Type Employee Name..." class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500">
+                                <input type="text" x-model="newEmployeeName" @keydown.enter="addEmployee" placeholder="Type Employee Name..." class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500">
                                 <button @click="addEmployee" class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">
                                     Add Staff
                                 </button>
@@ -160,6 +160,9 @@
                                         <span x-text="emp.name"></span>
                                         <button @click="removeEmployee(emp.id)" class="text-slate-500 hover:text-rose-400 font-bold px-1">×</button>
                                     </span>
+                                </template>
+                                <template x-if="employees.length === 0">
+                                    <p class="text-xs text-slate-500 italic py-1">No employees added yet. Type a name above to build your team.</p>
                                 </template>
                             </div>
                         </div>
@@ -209,6 +212,9 @@
                                         </div>
                                     </div>
                                 </template>
+                                <template x-if="pendingRequests.length === 0">
+                                    <p class="text-xs text-slate-500 text-center py-2">No pending time-off requests.</p>
+                                </template>
                             </div>
                         </div>
 
@@ -224,7 +230,7 @@
                     <h3 class="text-base font-bold text-white">Management Verification</h3>
                     <p class="text-xs text-slate-400 mt-1">Please insert the private operational passcode to unlock dashboard privileges.</p>
                 </div>
-                <input type="password" x-model="authInput" placeholder="••••" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center tracking-widest text-lg text-white focus:outline-none focus:border-indigo-500">
+                <input type="password" x-model="authInput" @keydown.enter="verifyPasscode" placeholder="••••" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center tracking-widest text-lg text-white focus:outline-none focus:border-indigo-500">
                 <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
                     <button @click="cancelAuthModal" class="bg-white/5 text-slate-300 py-2.5 rounded-xl border border-white/5">Cancel</button>
                     <button @click="verifyPasscode" class="bg-indigo-500 text-white py-2.5 rounded-xl shadow-lg shadow-indigo-950/50">Unlock</button>
@@ -264,14 +270,8 @@
                     this.selectedDate = today.toISOString().split('T')[0];
                     this.mngDate = this.selectedDate;
 
-                    // Hydration Protocols
-                    if (localStorage.getItem('rmj_employees_v3')) {
-                        this.employees = JSON.parse(localStorage.getItem('rmj_employees_v3'));
-                    } else {
-                        // Base initialization if memory file is missing
-                        this.employees = [{ id: 1, name: 'Alex Rivers' }, { id: 2, name: 'Casey Morgan' }];
-                        this.saveEmployees();
-                    }
+                    // Pull fresh data or empty array setups
+                    this.employees = JSON.parse(localStorage.getItem('rmj_employees_v3')) || [];
                     this.shifts = JSON.parse(localStorage.getItem('rmj_shifts_v3')) || [];
                     this.leaveRequests = JSON.parse(localStorage.getItem('rmj_leave_v3')) || [];
                 },
@@ -363,7 +363,7 @@
                     });
                     this.saveLeave();
                     alert('Request safely committed to pending execution timeline!');
-                    this.newRequestDate = ''; this.newRequestNote = '';
+                    this.selectedEmployeeForRequest = ''; this.newRequestDate = ''; this.newRequestNote = '';
                 },
                 createCustomShift() {
                     if (!this.mngEmpName || !this.mngRole || !this.mngTime || !this.mngDate) return alert('Please completely satisfy all shift layout parameters.');
