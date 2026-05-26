@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock-MJ Schedule Pro</title>
+    <title>Rock-MJ Schedule Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,52 +15,62 @@
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-[#0f172a] via-[#020617] to-[#1e1b4b] text-slate-100 min-h-screen flex justify-center antialiased p-0 sm:p-4">
+<body class="bg-gradient-to-br from-[#090d16] via-[#020617] to-[#111029] text-slate-100 min-h-screen flex justify-center antialiased p-0 sm:p-4">
 
-    <div x-data="appState()" class="w-full max-w-md bg-slate-900/40 backdrop-blur-xl shadow-2xl min-h-screen sm:min-h-[850px] sm:rounded-3xl flex flex-col justify-between border border-white/10 overflow-hidden relative">
+    <div x-data="appState()" class="w-full max-w-md bg-slate-900/50 backdrop-blur-2xl shadow-2xl min-h-screen sm:min-h-[885px] sm:rounded-3xl flex flex-col justify-between border border-white/10 overflow-hidden relative">
         
-        <div class="absolute top-[-10%] left-[-20%] w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-[20%] right-[-20%] w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-[-5%] right-[-10%] w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-[20%] left-[-25%] w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <header class="bg-slate-950/70 backdrop-blur-md p-5 border-b border-white/5 sticky top-0 z-20 space-y-4">
-            <div class="flex justify-between items-center">
+        <header class="bg-slate-950/80 backdrop-blur-lg p-5 border-b border-white/5 sticky top-0 z-20 space-y-3.5">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Rock-MJ Hub</h1>
-                    <p class="text-[11px] font-medium text-emerald-400/80 uppercase tracking-widest mt-0.5" x-text="role === 'manager' ? '⚡ Manager Command' : '👥 Staff Portal'"></p>
+                    <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Rock-MJ Scheduler</h1>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest" x-text="role === 'manager' ? 'Rock & MJ Control' : 'Staff Workspace'"></p>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <span class="text-xs bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-slate-300 font-medium" x-text="currentDateString"></span>
-                </div>
+                <span class="text-xs bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-slate-400 font-medium" x-text="currentDateString"></span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-1 bg-black/50 p-1 rounded-xl border border-white/5 text-xs font-bold">
+                <button @click="currentLocation = 'Location 1'" :class="currentLocation === 'Location 1' ? 'bg-gradient-to-b from-white/15 to-white/5 text-white border border-white/10 shadow-md' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition-all">
+                    📍 Location 1
+                </button>
+                <button @click="currentLocation = 'Location 2'" :class="currentLocation === 'Location 2' ? 'bg-gradient-to-b from-white/15 to-white/5 text-white border border-white/10 shadow-md' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition-all">
+                    📍 Location 2
+                </button>
             </div>
             
-            <div class="grid grid-cols-2 gap-1 bg-black/40 p-1 rounded-xl border border-white/5 text-xs font-semibold relative">
-                <button @click="role = 'employee'" :class="role === 'employee' ? 'bg-white/10 text-white shadow-lg shadow-black/20 border border-white/10' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition-all duration-200">
-                    Employee View
+            <div class="grid grid-cols-2 gap-1 bg-black/30 p-1 rounded-lg text-[11px] font-semibold">
+                <button @click="role = 'employee'" :class="role === 'employee' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-slate-500'" class="py-1 rounded-md border border-transparent transition-all">
+                    Employee Access
                 </button>
-                <button @click="role = 'manager'" :class="role === 'manager' ? 'bg-white/10 text-white shadow-lg shadow-black/20 border border-white/10' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition-all duration-200">
+                <button @click="role = 'manager'" :class="role === 'manager' ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' : 'text-slate-500'" class="py-1 rounded-md border border-transparent transition-all">
                     Rock & MJ Mode
                 </button>
             </div>
         </header>
 
-        <section class="bg-black/20 p-4 border-b border-white/5 space-y-3">
-            <div class="flex justify-between items-center">
+        <section class="bg-black/10 p-4 border-b border-white/5 space-y-3">
+            <div class="flex justify-between items-center text-xs font-bold tracking-wider text-slate-400">
                 <button @click="shiftWeek(-7)" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-slate-300 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
                 </button>
-                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider" x-text="getWeekRangeLabel()"></span>
+                <span class="uppercase font-bold text-slate-300" x-text="getWeekRangeLabel()"></span>
                 <button @click="shiftWeek(7)" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-slate-300 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
 
             <div class="flex justify-between gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 <template x-for="day in weekDays" :key="day.dateStr">
                     <button @click="selectedDate = day.dateStr" 
-                            :class="selectedDate === day.dateStr ? 'bg-gradient-to-b from-white/15 to-white/5 text-emerald-400 border-emerald-500/50 shadow-xl shadow-emerald-950/20' : 'bg-white/[0.02] text-slate-400 border-white/5 hover:bg-white/5'"
-                            class="flex flex-col items-center flex-1 py-2.5 px-1 rounded-xl border transition-all duration-200 text-center min-w-[48px]">
+                            :class="selectedDate === day.dateStr ? 'bg-white/10 text-emerald-400 border-emerald-500/40 shadow-xl shadow-emerald-950/20' : 'bg-white/[0.01] text-slate-400 border-white/5 hover:bg-white/5'"
+                            class="flex flex-col items-center flex-1 py-2.5 rounded-xl border transition-all text-center min-w-[46px]">
                         <span class="text-[9px] font-bold uppercase tracking-widest opacity-60 mb-0.5" x-text="day.name"></span>
-                        <span class="text-base font-bold" x-text="day.dayNum"></span>
+                        <span class="text-sm font-bold" x-text="day.dayNum"></span>
                     </button>
                 </template>
             </div>
@@ -69,60 +79,79 @@
         <main class="flex-1 p-4 overflow-y-auto space-y-5 z-10">
             
             <div>
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest" x-text="'Roster: ' + formatDisplayDate(selectedDate)"></h2>
-                    <span class="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full font-medium" x-text="filteredShifts.length + ' active'"></span class="text-xs">
+                <div class="flex justify-between items-center mb-2.5">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest" x-text="currentLocation + ' • ' + formatDisplayDate(selectedDate)"></h2>
+                    <span class="text-[10px] bg-white/5 text-slate-300 border border-white/10 px-2 py-0.5 rounded-full font-medium" x-text="filteredShifts.length + ' Shifts'"></span>
                 </div>
                 
-                <div class="space-y-2.5">
+                <div class="space-y-2">
                     <template x-for="shift in filteredShifts" :key="shift.id">
-                        <div :class="shift.role.includes('❌') ? 'border-rose-500/20 bg-rose-950/10' : 'border-white/5 bg-white/[0.03]'" class="p-3.5 rounded-2xl border backdrop-blur-md flex justify-between items-center transition-all duration-200 hover:border-white/10">
+                        <div :class="shift.role.includes('❌') ? 'border-rose-500/20 bg-rose-950/10' : 'border-white/5 bg-white/[0.03]'" class="p-3.5 rounded-xl border backdrop-blur-md flex justify-between items-center transition-all">
                             <div>
-                                <p class="font-semibold text-white tracking-wide" x-text="shift.employeeName"></p>
-                                <p class="text-xs text-slate-400 mt-0.5 font-medium" x-text="shift.role"></p>
+                                <p class="font-semibold text-white text-sm tracking-wide" x-text="shift.employeeName"></p>
+                                <p class="text-[11px] text-slate-400 mt-0.5" x-text="shift.role"></p>
                             </div>
-                            <div class="text-right">
-                                <span :class="shift.role.includes('❌') ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'" class="text-xs font-semibold px-3 py-1.5 rounded-xl border" x-text="shift.time"></span>
+                            <div>
+                                <span :class="shift.role.includes('❌') ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'" class="text-xs font-medium px-2.5 py-1 rounded-lg border" x-text="shift.time"></span>
                             </div>
                         </div>
                     </template>
 
                     <template x-if="filteredShifts.length === 0">
-                        <div class="text-center py-8 bg-white/[0.01] rounded-2xl border border-dashed border-white/5 text-slate-500 text-xs tracking-wide">
-                            No schedules posted for this date.
+                        <div class="text-center py-6 bg-white/[0.01] rounded-xl border border-dashed border-white/5 text-slate-500 text-xs">
+                            No active entries assigned to this facility date.
                         </div>
                     </template>
                 </div>
             </div>
 
-            <div class="pt-3 border-t border-white/5">
-                
+            <div class="pt-4 border-t border-white/5">
                 <template x-if="role === 'employee'">
-                    <div class="bg-white/[0.02] border border-white/5 p-4 rounded-2xl space-y-4 shadow-inner">
+                    <div class="bg-white/[0.02] border border-white/5 p-4 rounded-xl space-y-3.5 shadow-inner">
                         <div>
-                            <h3 class="text-sm font-bold text-slate-200">Request Time Off</h3>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Submit single or advanced dates directly into Rock & MJ's feed.</p>
+                            <h3 class="text-sm font-bold text-slate-200">Submit Time Off Request</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Logs directly to the dashboard pending file queue.</p>
                         </div>
-                        <div class="space-y-3 text-xs">
+                        <div class="space-y-2.5 text-xs">
                             <div class="grid grid-cols-1 gap-1">
-                                <label class="text-slate-400 font-medium pl-0.5">Target Date</label>
-                                <input type="date" x-model="newRequestDate" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500/50 text-sm">
+                                <label class="text-slate-400 font-medium pl-0.5">Verify Your Name</label>
+                                <select x-model="selectedEmployeeForRequest" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm">
+                                    <option value="" class="bg-slate-900">-- Choose Employee profile --</option>
+                                    <template x-for="emp in employees" :key="emp.id">
+                                        <option :value="emp.name" class="bg-slate-900" x-text="emp.name"></option>
+                                    </template>
+                                </select>
                             </div>
-                            <div class="grid grid-cols-1 gap-1">
-                                <label class="text-slate-400 font-medium pl-0.5">Reason / Leave Custom Note</label>
-                                <input type="text" x-model="newRequestNote" placeholder="e.g. Vacation planning, family event" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 text-sm">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex flex-col gap-1">
+                                    <label class="text-slate-400 font-medium pl-0.5">Date Off</label>
+                                    <input type="date" x-model="newRequestDate" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-white text-xs">
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <label class="text-slate-400 font-medium pl-0.5">Reason Note</label>
+                                    <input type="text" x-model="newRequestNote" placeholder="Appointment, trip..." class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-white placeholder-slate-600 text-xs">
+                                </div>
                             </div>
-                            <button @click="submitLeaveRequest" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold py-3 rounded-xl hover:opacity-90 active:scale-[0.99] transition-all text-sm shadow-lg shadow-emerald-950/40 mt-1">
-                                Send to Management Feed
+                            <button @click="submitLeaveRequest" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs mt-1 transition-all shadow-lg shadow-emerald-950/30">
+                                Send Absolute Request
                             </button>
                         </div>
                     </div>
                 </template>
 
                 <template x-if="role === 'manager'">
-                    <div class="space-y-5">
+                    <div class="space-y-4">
                         
-                        <div class="bg-white/[0.02] border border-white/5 p-4 rounded-2xl space-y-3.5">
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-200">Create & Assign a Shift</h3>
-                                <p class="text-[11px] text-slate-400 mt-0.5">Draft shifts instantly for any selected day or future
+                        <div class="bg-white/[0.02] border border-white/5 p-4 rounded-xl space-y-3">
+                            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">📋 Manage Team Roster</h3>
+                            
+                            <div class="flex gap-2">
+                                <input type="text" x-model="newEmployeeName" placeholder="Type Employee Name..." class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500">
+                                <button @click="addEmployee" class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">
+                                    Add Staff
+                                </button>
+                            </div>
+
+                            <div class="flex flex-wrap gap-1.5 pt-1">
+                                <template x-for="emp in employees" :key="emp.id">
+                                    <span class="inline-flex items-center gap-1 text-[11px] bg-white/5 border border-white
