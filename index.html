@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock-MJ Schedule Elite</title>
+    <title>Rock-MJ Secure Roster</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,8 +27,8 @@
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Rock-MJ Scheduler</h1>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest" x-text="role === 'manager' ? 'Rock & MJ Control' : 'Staff Workspace'"></p>
+                        <span :class="role === 'manager' ? 'bg-indigo-400' : 'bg-emerald-400'" class="w-1.5 h-1.5 rounded-full animate-pulse"></span>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400" x-text="role === 'manager' ? '⚡ Rock & MJ Active Session' : '🔒 Secure Staff Portal'"></p>
                     </div>
                 </div>
                 <span class="text-xs bg-white/5 border border-white/10 px-2.5 py-1 rounded-full text-slate-400 font-medium" x-text="currentDateString"></span>
@@ -44,11 +44,11 @@
             </div>
             
             <div class="grid grid-cols-2 gap-1 bg-black/30 p-1 rounded-lg text-[11px] font-semibold">
-                <button @click="role = 'employee'" :class="role === 'employee' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-slate-500'" class="py-1 rounded-md border border-transparent transition-all">
-                    Employee Access
+                <button @click="setRoleMode('employee')" :class="role === 'employee' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-slate-500'" class="py-1 rounded-md border border-transparent transition-all">
+                    Employee View
                 </button>
-                <button @click="role = 'manager'" :class="role === 'manager' ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' : 'text-slate-500'" class="py-1 rounded-md border border-transparent transition-all">
-                    Rock & MJ Mode
+                <button @click="setRoleMode('manager')" :class="role === 'manager' ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' : 'text-slate-500'" class="py-1 rounded-md border border-transparent transition-all">
+                    🔑 Rock & MJ Mode
                 </button>
             </div>
         </header>
@@ -106,17 +106,18 @@
             </div>
 
             <div class="pt-4 border-t border-white/5">
+                
                 <template x-if="role === 'employee'">
                     <div class="bg-white/[0.02] border border-white/5 p-4 rounded-xl space-y-3.5 shadow-inner">
                         <div>
                             <h3 class="text-sm font-bold text-slate-200">Submit Time Off Request</h3>
-                            <p class="text-[10px] text-slate-400 mt-0.5">Logs directly to the dashboard pending file queue.</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Logs straight to Rock & MJ's pending approval list.</p>
                         </div>
                         <div class="space-y-2.5 text-xs">
                             <div class="grid grid-cols-1 gap-1">
-                                <label class="text-slate-400 font-medium pl-0.5">Verify Your Name</label>
+                                <label class="text-slate-400 font-medium pl-0.5">Select Your Name</label>
                                 <select x-model="selectedEmployeeForRequest" class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-white focus:outline-none focus:border-emerald-500/50 text-sm">
-                                    <option value="" class="bg-slate-900">-- Choose Employee profile --</option>
+                                    <option value="" class="bg-slate-900">-- Click to pick profile --</option>
                                     <template x-for="emp in employees" :key="emp.id">
                                         <option :value="emp.name" class="bg-slate-900" x-text="emp.name"></option>
                                     </template>
@@ -128,12 +129,12 @@
                                     <input type="date" x-model="newRequestDate" class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-white text-xs">
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <label class="text-slate-400 font-medium pl-0.5">Reason Note</label>
-                                    <input type="text" x-model="newRequestNote" placeholder="Appointment, trip..." class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-white placeholder-slate-600 text-xs">
+                                    <label class="text-slate-400 font-medium pl-0.5">Optional Note</label>
+                                    <input type="text" x-model="newRequestNote" placeholder="Trip, appointment..." class="bg-black/40 border border-white/10 rounded-xl p-2.5 text-white placeholder-slate-600 text-xs">
                                 </div>
                             </div>
                             <button @click="submitLeaveRequest" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs mt-1 transition-all shadow-lg shadow-emerald-950/30">
-                                Send Absolute Request
+                                Send Request to Management
                             </button>
                         </div>
                     </div>
@@ -143,24 +144,22 @@
                     <div class="space-y-4">
                         
                         <div class="bg-white/[0.02] border border-white/5 p-4 rounded-xl space-y-3">
-                            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">📋 Manage Team Roster</h3>
-                            
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">📋 Manage Team Roster</h3>
+                                <button @click="lockManagerMode" class="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-md font-medium">Log Out Admin</button>
+                            </div>
                             <div class="flex gap-2">
                                 <input type="text" x-model="newEmployeeName" placeholder="Type Employee Name..." class="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500">
                                 <button @click="addEmployee" class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">
                                     Add Staff
                                 </button>
                             </div>
-
                             <div class="flex flex-wrap gap-1.5 pt-1">
                                 <template x-for="emp in employees" :key="emp.id">
                                     <span class="inline-flex items-center gap-1 text-[11px] bg-white/5 border border-white/10 rounded-md pl-2 pr-1 py-0.5 text-slate-300">
                                         <span x-text="emp.name"></span>
                                         <button @click="removeEmployee(emp.id)" class="text-slate-500 hover:text-rose-400 font-bold px-1">×</button>
                                     </span>
-                                </template>
-                                <template x-if="employees.length === 0">
-                                    <span class="text-[11px] text-slate-600 italic">Roster empty. Add staff above.</span>
                                 </template>
                             </div>
                         </div>
@@ -170,12 +169,12 @@
                             <div class="space-y-2 text-xs">
                                 <div class="grid grid-cols-2 gap-2">
                                     <select x-model="mngEmpName" class="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-white focus:outline-none">
-                                        <option value="" class="bg-slate-900">Select Employee</option>
+                                        <option value="">Select Employee</option>
                                         <template x-for="emp in employees" :key="emp.id">
-                                            <option :value="emp.name" class="bg-slate-900" x-text="emp.name"></option>
+                                            <option :value="emp.name" x-text="emp.name"></option>
                                         </template>
                                     </select>
-                                    <input type="text" x-model="mngRole" placeholder="Role (e.g. Front Desk)" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white placeholder-slate-600">
+                                    <input type="text" x-model="mngRole" placeholder="Role (e.g. Server)" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white placeholder-slate-600">
                                 </div>
                                 <div class="grid grid-cols-2 gap-2">
                                     <input type="text" x-model="mngTime" placeholder="Hours (e.g. 9am - 5pm)" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white placeholder-slate-600">
@@ -210,12 +209,6 @@
                                         </div>
                                     </div>
                                 </template>
-
-                                <template x-if="pendingRequests.length === 0">
-                                    <div class="text-center py-4 text-[11px] text-slate-600">
-                                        No team requests awaiting authorization.
-                                    </div>
-                                </template>
                             </div>
                         </div>
 
@@ -224,13 +217,24 @@
             </div>
         </main>
 
+        <div x-show="showAuthModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4" x-transition>
+            <div class="bg-slate-900 border border-white/10 w-full max-w-xs rounded-2xl p-6 text-center space-y-4 shadow-2xl">
+                <div class="w-12 h-12 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full flex items-center justify-center mx-auto text-xl font-bold">🔒</div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Management Verification</h3>
+                    <p class="text-xs text-slate-400 mt-1">Please insert the private operational passcode to unlock dashboard privileges.</p>
+                </div>
+                <input type="password" x-model="authInput" placeholder="••••" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center tracking-widest text-lg text-white focus:outline-none focus:border-indigo-500">
+                <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                    <button @click="cancelAuthModal" class="bg-white/5 text-slate-300 py-2.5 rounded-xl border border-white/5">Cancel</button>
+                    <button @click="verifyPasscode" class="bg-indigo-500 text-white py-2.5 rounded-xl shadow-lg shadow-indigo-950/50">Unlock</button>
+                </div>
+            </div>
+        </div>
+
         <footer class="bg-slate-950/90 backdrop-blur-lg p-4 border-t border-white/5 text-[10px] text-slate-500 flex justify-between items-center z-20">
-            <div>
-                Facility Context: <span class="text-slate-300 font-bold" x-text="currentLocation"></span>
-            </div>
-            <div class="font-medium tracking-wide">
-                Rock-MJ MultiSite Core
-            </div>
+            <div>Active Context: <span class="text-slate-300 font-bold" x-text="currentLocation"></span></div>
+            <div class="font-medium tracking-wide">Rock-MJ Secure Shield v3</div>
         </footer>
     </div>
 
@@ -243,167 +247,143 @@
                 weekOffset: 0,
                 currentDateString: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
                 
-                // Form Fields
-                newEmployeeName: '',
-                selectedEmployeeForRequest: '',
+                // Security Gates
+                showAuthModal: false,
+                authInput: '',
+                masterPasscode: '1234', // <-- CHANGE THIS PIN SIGNATURE AS NEEDED FOR ROCK & MJ
+
+                // Form Blocks
+                newEmployeeName: '', selectedEmployeeForRequest: '',
                 newRequestDate: '', newRequestNote: '',
                 mngEmpName: '', mngRole: '', mngTime: '', mngDate: '',
 
-                // System Tables
-                employees: [],
-                shifts: [],
-                leaveRequests: [],
+                employees: [], shifts: [], leaveRequests: [],
 
                 init() {
                     const today = new Date();
                     this.selectedDate = today.toISOString().split('T')[0];
                     this.mngDate = this.selectedDate;
 
-                    // Hydrate from LocalStorage or inject sample data
-                    if (localStorage.getItem('rmj_employees_v2')) {
-                        this.employees = JSON.parse(localStorage.getItem('rmj_employees_v2'));
+                    // Hydration Protocols
+                    if (localStorage.getItem('rmj_employees_v3')) {
+                        this.employees = JSON.parse(localStorage.getItem('rmj_employees_v3'));
                     } else {
-                        this.employees = [
-                            { id: 1, name: 'Alex Rivers' },
-                            { id: 2, name: 'Casey Morgan' },
-                            { id: 3, name: 'Jordan Taylor' }
-                        ];
+                        // Base initialization if memory file is missing
+                        this.employees = [{ id: 1, name: 'Alex Rivers' }, { id: 2, name: 'Casey Morgan' }];
                         this.saveEmployees();
                     }
-
-                    if (localStorage.getItem('rmj_shifts_v2')) {
-                        this.shifts = JSON.parse(localStorage.getItem('rmj_shifts_v2'));
-                    } else {
-                        this.shifts = [
-                            { id: 1, employeeName: 'Alex Rivers', date: this.selectedDate, role: 'Floor Lead Manager', time: '8:00 AM - 4:00 PM', location: 'Location 1' },
-                            { id: 2, employeeName: 'Casey Morgan', date: this.selectedDate, role: 'Inventory Control', time: '12:00 PM - 8:00 PM', location: 'Location 2' }
-                        ];
-                        this.saveShifts();
-                    }
-
-                    if (localStorage.getItem('rmj_leave_v2')) {
-                        this.leaveRequests = JSON.parse(localStorage.getItem('rmj_leave_v2'));
-                    } else {
-                        this.leaveRequests = [];
-                    }
+                    this.shifts = JSON.parse(localStorage.getItem('rmj_shifts_v3')) || [];
+                    this.leaveRequests = JSON.parse(localStorage.getItem('rmj_leave_v3')) || [];
                 },
 
-                // Storage Sync Drivers
-                saveEmployees() { localStorage.setItem('rmj_employees_v2', JSON.stringify(this.employees)); },
-                saveShifts() { localStorage.setItem('rmj_shifts_v2', JSON.stringify(this.shifts)); },
-                saveLeave() { localStorage.setItem('rmj_leave_v2', JSON.stringify(this.leaveRequests)); },
+                saveEmployees() { localStorage.setItem('rmj_employees_v3', JSON.stringify(this.employees)); },
+                saveShifts() { localStorage.setItem('rmj_shifts_v3', JSON.stringify(this.shifts)); },
+                saveLeave() { localStorage.setItem('rmj_leave_v3', JSON.stringify(this.leaveRequests)); },
 
-                // Employee List Methods
+                // SECURITY GATE LOGIC ENGINE
+                setRoleMode(mode) {
+                    if (mode === 'employee') {
+                        this.role = 'employee';
+                    } else if (mode === 'manager') {
+                        if (this.role === 'manager') return; // Already verified
+                        this.authInput = '';
+                        this.showAuthModal = true;
+                    }
+                },
+                verifyPasscode() {
+                    if (this.authInput === this.masterPasscode) {
+                        this.role = 'manager';
+                        this.showAuthModal = false;
+                    } else {
+                        alert('Access Denied: Invalid Authentication Signature.');
+                        this.authInput = '';
+                    }
+                },
+                cancelAuthModal() {
+                    this.showAuthModal = false;
+                },
+                lockManagerMode() {
+                    this.role = 'employee';
+                    alert('Admin session cleared.');
+                },
+
+                // ROSTER SYSTEMS
                 addEmployee() {
                     if (!this.newEmployeeName.trim()) return;
-                    this.employees.push({
-                        id: Date.now(),
-                        name: this.newEmployeeName.trim()
-                    });
+                    this.employees.push({ id: Date.now(), name: this.newEmployeeName.trim() });
                     this.saveEmployees();
                     this.newEmployeeName = '';
                 },
-
                 removeEmployee(id) {
                     this.employees = this.employees.filter(e => e.id !== id);
                     this.saveEmployees();
                 },
 
-                // Calendar Navigation
+                // CALENDAR CONTEXT ENGINE
                 shiftWeek(days) {
                     this.weekOffset += days;
                     const baseDate = new Date();
                     baseDate.setDate(baseDate.getDate() + this.weekOffset);
                     this.selectedDate = baseDate.toISOString().split('T')[0];
                 },
-
                 getWeekRangeLabel() {
                     const firstDay = new Date(); firstDay.setDate(firstDay.getDate() + this.weekOffset);
                     const lastDay = new Date(); lastDay.setDate(lastDay.getDate() + this.weekOffset + 6);
                     return firstDay.toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' - ' + lastDay.toLocaleDateString('en-US', {month:'short', day:'numeric'});
                 },
-
                 get weekDays() {
                     const days = [];
                     for (let i = 0; i < 7; i++) {
                         const d = new Date();
                         d.setDate(d.getDate() + this.weekOffset + i);
-                        days.push({
-                            name: d.toLocaleDateString('en-US', { weekday: 'short' }),
-                            dayNum: d.getDate(),
-                            dateStr: d.toISOString().split('T')[0]
-                        });
+                        days.push({ name: d.toLocaleDateString('en-US', { weekday: 'short' }), dayNum: d.getDate(), dateStr: d.toISOString().split('T')[0] });
                     }
                     return days;
                 },
 
-                // Computeds (Filtered Views)
                 get filteredShifts() {
                     return this.shifts.filter(s => s.date === this.selectedDate && s.location === this.currentLocation);
                 },
-
                 get pendingRequests() {
                     return this.leaveRequests.filter(r => r.status === 'Pending');
                 },
 
-                // Submission Logic Triggers
+                // BUSINESS OPERATIONS ENGINE
                 submitLeaveRequest() {
-                    if (!this.selectedEmployeeForRequest) return alert('Please identify your profile name.');
-                    if (!this.newRequestDate) return alert('Please input valid calendar date target.');
+                    if (!this.selectedEmployeeForRequest) return alert('Identify your name target profile.');
+                    if (!this.newRequestDate) return alert('Input valid target date.');
 
                     this.leaveRequests.push({
                         id: Date.now(),
                         employeeName: this.selectedEmployeeForRequest,
                         date: this.newRequestDate,
-                        note: this.newRequestNote || 'General Off Request',
+                        note: this.newRequestNote || 'General Absence Request',
                         location: this.currentLocation,
                         status: 'Pending'
                     });
-
                     this.saveLeave();
-                    alert('Time-off logged directly to Rock & MJ dashboard queue!');
+                    alert('Request safely committed to pending execution timeline!');
                     this.newRequestDate = ''; this.newRequestNote = '';
                 },
-
                 createCustomShift() {
-                    if (!this.mngEmpName || !this.mngRole || !this.mngTime || !this.mngDate) {
-                        return alert('Please completely satisfy all input blocks.');
-                    }
-
-                    this.shifts.push({
-                        id: Date.now(),
-                        employeeName: this.mngEmpName,
-                        role: this.mngRole,
-                        time: this.mngTime,
-                        date: this.mngDate,
-                        location: this.currentLocation
-                    });
-
+                    if (!this.mngEmpName || !this.mngRole || !this.mngTime || !this.mngDate) return alert('Please completely satisfy all shift layout parameters.');
+                    
+                    this.shifts.push({ id: Date.now(), employeeName: this.mngEmpName, role: this.mngRole, time: this.mngTime, date: this.mngDate, location: this.currentLocation });
                     this.saveShifts();
-                    alert('Shift saved to ' + this.currentLocation);
+                    alert('Shift saved successfully!');
                     this.mngEmpName = ''; this.mngRole = ''; this.mngTime = '';
                 },
-
                 resolveRequest(requestId, decision) {
                     const target = this.leaveRequests.find(r => r.id === requestId);
                     if (target) {
                         target.status = decision;
                         if (decision === 'Approved') {
-                            // Automatically place a lock block entry into the active location roster data array
-                            this.shifts.push({
-                                id: Date.now(),
-                                employeeName: target.employeeName,
-                                date: target.date,
-                                role: '❌ APPROVED LEAVE',
-                                time: 'Unavailable',
-                                location: target.location
-                            });
+                            this.shifts.push({ id: Date.now(), employeeName: target.employeeName, date: target.date, role: '❌ APPROVED LEAVE', time: 'Unavailable', location: target.location });
                             this.saveShifts();
                         }
                         this.saveLeave();
                     }
                 },
-
                 formatDisplayDate(dateStr) {
                     if (!dateStr) return '';
                     const parts = dateStr.split('-');
