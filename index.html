@@ -154,4 +154,263 @@
 
                             <div class="flex flex-wrap gap-1.5 pt-1">
                                 <template x-for="emp in employees" :key="emp.id">
-                                    <span class="inline-flex items-center gap-1 text-[11px] bg-white/5 border border-white
+                                    <span class="inline-flex items-center gap-1 text-[11px] bg-white/5 border border-white/10 rounded-md pl-2 pr-1 py-0.5 text-slate-300">
+                                        <span x-text="emp.name"></span>
+                                        <button @click="removeEmployee(emp.id)" class="text-slate-500 hover:text-rose-400 font-bold px-1">×</button>
+                                    </span>
+                                </template>
+                                <template x-if="employees.length === 0">
+                                    <span class="text-[11px] text-slate-600 italic">Roster empty. Add staff above.</span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/[0.02] border border-white/5 p-4 rounded-xl space-y-3">
+                            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">➕ Create Schedule Entry</h3>
+                            <div class="space-y-2 text-xs">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <select x-model="mngEmpName" class="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-white focus:outline-none">
+                                        <option value="" class="bg-slate-900">Select Employee</option>
+                                        <template x-for="emp in employees" :key="emp.id">
+                                            <option :value="emp.name" class="bg-slate-900" x-text="emp.name"></option>
+                                        </template>
+                                    </select>
+                                    <input type="text" x-model="mngRole" placeholder="Role (e.g. Front Desk)" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white placeholder-slate-600">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" x-model="mngTime" placeholder="Hours (e.g. 9am - 5pm)" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white placeholder-slate-600">
+                                    <input type="date" x-model="mngDate" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white">
+                                </div>
+                                <button @click="createCustomShift" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-2 rounded-xl text-xs shadow-md transition-all">
+                                    Save Shift to Active Facility
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Pending Absence File Line</h3>
+                            <div class="space-y-2">
+                                <template x-for="req in pendingRequests" :key="req.id">
+                                    <div class="bg-white/[0.02] border border-white/5 p-3.5 rounded-xl space-y-2.5">
+                                        <div class="text-xs">
+                                            <div class="flex justify-between items-center">
+                                                <p class="font-bold text-slate-200 text-sm" x-text="req.employeeName"></p>
+                                                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-medium text-[10px]" x-text="req.location"></span>
+                                            </div>
+                                            <p class="text-[11px] text-indigo-400 font-semibold mt-0.5" x-text="'Requested Date: ' + formatDisplayDate(req.date)"></p>
+                                            <p class="text-xs text-slate-400 italic mt-1 bg-black/20 p-2 rounded-lg border border-white/5" x-text="'&ldquo;' + req.note + '&rdquo;'"></p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                            <button @click="resolveRequest(req.id, 'Denied')" class="bg-white/5 border border-rose-500/20 text-rose-400 py-1.5 rounded-lg font-medium transition">
+                                                Deny
+                                            </button>
+                                            <button @click="resolveRequest(req.id, 'Approved')" class="bg-emerald-500 text-slate-950 py-1.5 rounded-lg font-bold transition">
+                                                Approve
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="pendingRequests.length === 0">
+                                    <div class="text-center py-4 text-[11px] text-slate-600">
+                                        No team requests awaiting authorization.
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+        </main>
+
+        <footer class="bg-slate-950/90 backdrop-blur-lg p-4 border-t border-white/5 text-[10px] text-slate-500 flex justify-between items-center z-20">
+            <div>
+                Facility Context: <span class="text-slate-300 font-bold" x-text="currentLocation"></span>
+            </div>
+            <div class="font-medium tracking-wide">
+                Rock-MJ MultiSite Core
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function appState() {
+            return {
+                role: 'employee',
+                currentLocation: 'Location 1',
+                selectedDate: '',
+                weekOffset: 0,
+                currentDateString: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                
+                // Form Fields
+                newEmployeeName: '',
+                selectedEmployeeForRequest: '',
+                newRequestDate: '', newRequestNote: '',
+                mngEmpName: '', mngRole: '', mngTime: '', mngDate: '',
+
+                // System Tables
+                employees: [],
+                shifts: [],
+                leaveRequests: [],
+
+                init() {
+                    const today = new Date();
+                    this.selectedDate = today.toISOString().split('T')[0];
+                    this.mngDate = this.selectedDate;
+
+                    // Hydrate from LocalStorage or inject sample data
+                    if (localStorage.getItem('rmj_employees_v2')) {
+                        this.employees = JSON.parse(localStorage.getItem('rmj_employees_v2'));
+                    } else {
+                        this.employees = [
+                            { id: 1, name: 'Alex Rivers' },
+                            { id: 2, name: 'Casey Morgan' },
+                            { id: 3, name: 'Jordan Taylor' }
+                        ];
+                        this.saveEmployees();
+                    }
+
+                    if (localStorage.getItem('rmj_shifts_v2')) {
+                        this.shifts = JSON.parse(localStorage.getItem('rmj_shifts_v2'));
+                    } else {
+                        this.shifts = [
+                            { id: 1, employeeName: 'Alex Rivers', date: this.selectedDate, role: 'Floor Lead Manager', time: '8:00 AM - 4:00 PM', location: 'Location 1' },
+                            { id: 2, employeeName: 'Casey Morgan', date: this.selectedDate, role: 'Inventory Control', time: '12:00 PM - 8:00 PM', location: 'Location 2' }
+                        ];
+                        this.saveShifts();
+                    }
+
+                    if (localStorage.getItem('rmj_leave_v2')) {
+                        this.leaveRequests = JSON.parse(localStorage.getItem('rmj_leave_v2'));
+                    } else {
+                        this.leaveRequests = [];
+                    }
+                },
+
+                // Storage Sync Drivers
+                saveEmployees() { localStorage.setItem('rmj_employees_v2', JSON.stringify(this.employees)); },
+                saveShifts() { localStorage.setItem('rmj_shifts_v2', JSON.stringify(this.shifts)); },
+                saveLeave() { localStorage.setItem('rmj_leave_v2', JSON.stringify(this.leaveRequests)); },
+
+                // Employee List Methods
+                addEmployee() {
+                    if (!this.newEmployeeName.trim()) return;
+                    this.employees.push({
+                        id: Date.now(),
+                        name: this.newEmployeeName.trim()
+                    });
+                    this.saveEmployees();
+                    this.newEmployeeName = '';
+                },
+
+                removeEmployee(id) {
+                    this.employees = this.employees.filter(e => e.id !== id);
+                    this.saveEmployees();
+                },
+
+                // Calendar Navigation
+                shiftWeek(days) {
+                    this.weekOffset += days;
+                    const baseDate = new Date();
+                    baseDate.setDate(baseDate.getDate() + this.weekOffset);
+                    this.selectedDate = baseDate.toISOString().split('T')[0];
+                },
+
+                getWeekRangeLabel() {
+                    const firstDay = new Date(); firstDay.setDate(firstDay.getDate() + this.weekOffset);
+                    const lastDay = new Date(); lastDay.setDate(lastDay.getDate() + this.weekOffset + 6);
+                    return firstDay.toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' - ' + lastDay.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+                },
+
+                get weekDays() {
+                    const days = [];
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date();
+                        d.setDate(d.getDate() + this.weekOffset + i);
+                        days.push({
+                            name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                            dayNum: d.getDate(),
+                            dateStr: d.toISOString().split('T')[0]
+                        });
+                    }
+                    return days;
+                },
+
+                // Computeds (Filtered Views)
+                get filteredShifts() {
+                    return this.shifts.filter(s => s.date === this.selectedDate && s.location === this.currentLocation);
+                },
+
+                get pendingRequests() {
+                    return this.leaveRequests.filter(r => r.status === 'Pending');
+                },
+
+                // Submission Logic Triggers
+                submitLeaveRequest() {
+                    if (!this.selectedEmployeeForRequest) return alert('Please identify your profile name.');
+                    if (!this.newRequestDate) return alert('Please input valid calendar date target.');
+
+                    this.leaveRequests.push({
+                        id: Date.now(),
+                        employeeName: this.selectedEmployeeForRequest,
+                        date: this.newRequestDate,
+                        note: this.newRequestNote || 'General Off Request',
+                        location: this.currentLocation,
+                        status: 'Pending'
+                    });
+
+                    this.saveLeave();
+                    alert('Time-off logged directly to Rock & MJ dashboard queue!');
+                    this.newRequestDate = ''; this.newRequestNote = '';
+                },
+
+                createCustomShift() {
+                    if (!this.mngEmpName || !this.mngRole || !this.mngTime || !this.mngDate) {
+                        return alert('Please completely satisfy all input blocks.');
+                    }
+
+                    this.shifts.push({
+                        id: Date.now(),
+                        employeeName: this.mngEmpName,
+                        role: this.mngRole,
+                        time: this.mngTime,
+                        date: this.mngDate,
+                        location: this.currentLocation
+                    });
+
+                    this.saveShifts();
+                    alert('Shift saved to ' + this.currentLocation);
+                    this.mngEmpName = ''; this.mngRole = ''; this.mngTime = '';
+                },
+
+                resolveRequest(requestId, decision) {
+                    const target = this.leaveRequests.find(r => r.id === requestId);
+                    if (target) {
+                        target.status = decision;
+                        if (decision === 'Approved') {
+                            // Automatically place a lock block entry into the active location roster data array
+                            this.shifts.push({
+                                id: Date.now(),
+                                employeeName: target.employeeName,
+                                date: target.date,
+                                role: '❌ APPROVED LEAVE',
+                                time: 'Unavailable',
+                                location: target.location
+                            });
+                            this.saveShifts();
+                        }
+                        this.saveLeave();
+                    }
+                },
+
+                formatDisplayDate(dateStr) {
+                    if (!dateStr) return '';
+                    const parts = dateStr.split('-');
+                    return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
