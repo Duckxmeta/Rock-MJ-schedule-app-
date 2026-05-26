@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock-MJ Roster (Deputy Grid Mode)</title>
+    <title>Rock-MJ Smart Roster Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,13 +17,13 @@
 </head>
 <body class="bg-[#0b111e] text-slate-100 min-h-screen antialiased p-0 md:p-6 flex flex-col items-center">
 
-    <div x-data="appState()" class="w-full max-w-5xl bg-[#131b2e] shadow-2xl rounded-2xl border border-white/5 overflow-hidden flex flex-col h-[850px] relative">
+    <div x-data="appState()" class="w-full max-w-6xl bg-[#131b2e] shadow-2xl rounded-2xl border border-white/5 overflow-hidden flex flex-col h-[850px] relative">
         
         <header class="bg-[#090d16] p-4 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-white/5 z-20">
             <div>
                 <div class="flex items-center gap-2">
                     <h1 class="text-xl font-bold tracking-tight text-white">Rock-MJ Smart Roster</h1>
-                    <span :class="role === 'manager' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'" class="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border" x-text="role === 'manager' ? '⚡ Manager' : '🔒 Staff'"></span>
+                    <span :class="role === 'manager' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'" class="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border" x-text="role === 'manager' ? '⚡ Manager' : '🔒 Staff'"></span >
                 </div>
                 <p class="text-xs text-slate-400 mt-0.5">Deputy Matrix Interface Mode</p>
             </div>
@@ -49,12 +49,12 @@
         </section>
 
         <main class="flex-1 overflow-auto bg-[#0f172a] scrollbar-none">
-            <table class="w-full border-collapse text-left min-w-[800px]">
+            <table class="w-full border-collapse text-left min-w-[900px]">
                 <thead>
                     <tr class="bg-[#161f33] border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider font-bold">
-                        <th class="p-4 w-[180px] sticky left-0 bg-[#161f33] border-r border-white/5 shadow-md z-10">Team Roster Member</th>
+                        <th class="p-4 w-[220px] sticky left-0 bg-[#161f33] border-r border-white/5 shadow-md z-10">Team Roster Member</th>
                         <template x-for="day in weekDays" :key="day.dateStr">
-                            <th class="p-4 text-center border-r border-white/5 min-w-[120px]">
+                            <th class="p-4 text-center border-r border-white/5 min-w-[130px]">
                                 <div class="text-white font-bold" x-text="day.name"></div>
                                 <div class="text-slate-400 font-medium text-xs mt-0.5" x-text="day.dayNum"></div>
                             </th>
@@ -64,19 +64,35 @@
                 <tbody class="divide-y divide-white/5 text-xs">
                     <template x-for="emp in employees" :key="emp.id">
                         <tr class="hover:bg-white/[0.01] transition">
-                            <td class="p-4 font-semibold text-slate-200 sticky left-0 bg-[#0f172a] border-r border-white/5 shadow-md flex justify-between items-center group">
-                                <span class="truncate pr-2 text-sm" x-text="emp.name"></span>
-                                <template x-if="role === 'manager'">
-                                    <button @click="removeEmployee(emp.id)" class="text-slate-600 hover:text-rose-400 font-bold opacity-0 group-hover:opacity-100 transition text-sm">×</button>
-                                </template>
+                            <td class="p-4 font-semibold text-slate-200 sticky left-0 bg-[#0f172a] border-r border-white/5 shadow-md z-10">
+                                <div class="flex flex-col gap-1 group">
+                                    <div class="flex justify-between items-center">
+                                        <span class="truncate text-sm font-bold text-white" x-text="emp.name"></span>
+                                        <template x-if="role === 'manager'">
+                                            <button @click="removeEmployee(emp.id)" class="text-slate-600 hover:text-rose-400 font-bold opacity-0 group-hover:opacity-100 transition text-sm px-1">×</button>
+                                        </template>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span class="bg-indigo-950/60 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                            ⏱️ <span x-text="calculateWeeklyHours(emp.name)"></span> hrs/wk
+                                        </span>
+                                    </div>
+                                </div>
                             </td>
                             
                             <template x-for="day in weekDays" :key="day.dateStr">
                                 <td class="p-2 border-r border-white/5 align-top text-center h-24 bg-black/5">
                                     <div class="flex flex-col gap-1 h-full justify-center items-center">
                                         <template x-for="shift in getCellShifts(emp.name, day.dateStr)" :key="shift.id">
-                                            <div :class="shift.role.includes('❌') ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'" class="w-full p-2 rounded-lg border text-left flex flex-col justify-between shadow-sm">
-                                                <div class="font-bold text-[11px] tracking-wide truncate" x-text="shift.time"></div>
+                                            <div :class="shift.role.includes('❌') ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'" class="w-full p-2 rounded-lg border text-left flex flex-col justify-between shadow-sm relative group/shift">
+                                                
+                                                <template x-if="role === 'manager'">
+                                                    <button @click="deleteShift(shift.id)" class="absolute top-1 right-1 w-5 h-5 bg-rose-950/80 text-rose-400 border border-rose-500/30 rounded flex items-center justify-center opacity-0 group-hover/shift:opacity-100 transition hover:bg-rose-900 hover:text-white font-bold text-[10px]" title="Delete Shift">
+                                                        🗑️
+                                                    </button>
+                                                </template>
+
+                                                <div class="font-bold text-[11px] tracking-wide truncate pr-4" x-text="shift.time"></div>
                                                 <div class="text-[10px] text-slate-400 truncate mt-0.5 font-medium uppercase tracking-tight" x-text="shift.role"></div>
                                             </div>
                                         </template>
@@ -108,7 +124,7 @@
                         <p class="text-[10px] text-slate-400">Routes to Rock & MJ's pending desktop queue.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 w-full md:w-auto text-xs">
-                        <select x-model="selectedEmployeeForRequest" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white text-xs max-w-[160px]">
+                        <select x-model="selectedEmployeeForRequest" class="bg-black/40 border border-white/10 rounded-lg p-2 text-white text-xs min-w-[160px]">
                             <option value="">Who are you?</option>
                             <template x-for="emp in employees" :key="emp.id">
                                 <option :value="emp.name" x-text="emp.name"></option>
@@ -143,7 +159,7 @@
                                 </template>
                             </select>
                             <input type="text" x-model="mngRole" placeholder="Role" class="bg-black/40 border border-white/10 rounded-md p-1.5 text-white">
-                            <input type="text" x-model="mngTime" placeholder="Hours" class="bg-black/40 border border-white/10 rounded-md p-1.5 text-white">
+                            <input type="text" x-model="mngTime" placeholder="Hours (e.g. 8am-4pm)" class="bg-black/40 border border-white/10 rounded-md p-1.5 text-white">
                             <input type="date" x-model="mngDate" class="bg-black/40 border border-white/10 rounded-md p-1.5 text-white">
                         </div>
                         <button @click="createCustomShift" class="w-full bg-indigo-500 text-white font-bold py-1.5 rounded-lg text-xs mt-1 hover:bg-indigo-400">Save Shift Entry</button>
@@ -153,7 +169,7 @@
         </footer>
 
         <template x-if="role === 'manager' && pendingRequests.length > 0">
-            <div class="absolute bottom-20 right-4 max-w-sm w-full bg-slate-900 border border-amber-500/20 rounded-xl p-4 shadow-2xl space-y-3 z-30">
+            <div class="absolute bottom-24 right-4 max-w-sm w-full bg-slate-900 border border-amber-500/20 rounded-xl p-4 shadow-2xl space-y-3 z-30">
                 <div class="flex justify-between items-center">
                     <h5 class="text-xs font-bold text-amber-400 uppercase tracking-wider">⚠️ Pending Time-Off Feed</h5>
                     <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded font-bold" x-text="pendingRequests.length"></span>
@@ -204,7 +220,7 @@
                 
                 showAuthModal: false,
                 authInput: '',
-                masterPasscode: '1234', // <-- ROCK & MJ DEFAULT ACCESS KEY PIN
+                masterPasscode: '1234', // <-- ROCK & MJ ACCESS PASSWORD SIGNATURE
 
                 newEmployeeName: '', selectedEmployeeForRequest: '',
                 newRequestDate: '', newRequestNote: '',
@@ -214,15 +230,14 @@
 
                 init() {
                     this.mngDate = new Date().toISOString().split('T')[0];
-                    // Pull real saved data structures (starts fresh and empty if empty)
-                    this.employees = JSON.parse(localStorage.getItem('rmj_employees_v4')) || [];
-                    this.shifts = JSON.parse(localStorage.getItem('rmj_shifts_v4')) || [];
-                    this.leaveRequests = JSON.parse(localStorage.getItem('rmj_leave_v4')) || [];
+                    this.employees = JSON.parse(localStorage.getItem('rmj_employees_v5')) || [];
+                    this.shifts = JSON.parse(localStorage.getItem('rmj_shifts_v5')) || [];
+                    this.leaveRequests = JSON.parse(localStorage.getItem('rmj_leave_v5')) || [];
                 },
 
-                saveEmployees() { localStorage.setItem('rmj_employees_v4', JSON.stringify(this.employees)); },
-                saveShifts() { localStorage.setItem('rmj_shifts_v4', JSON.stringify(this.shifts)); },
-                saveLeave() { localStorage.setItem('rmj_leave_v4', JSON.stringify(this.leaveRequests)); },
+                saveEmployees() { localStorage.setItem('rmj_employees_v5', JSON.stringify(this.employees)); },
+                saveShifts() { localStorage.setItem('rmj_shifts_v5', JSON.stringify(this.shifts)); },
+                saveLeave() { localStorage.setItem('rmj_leave_v5', JSON.stringify(this.leaveRequests)); },
 
                 setRoleMode(mode) {
                     if (mode === 'employee') { this.role = 'employee'; } 
@@ -274,6 +289,71 @@
                     return this.shifts.filter(s => s.employeeName === empName && s.date === dateStr && s.location === this.currentLocation);
                 },
                 get pendingRequests() { return this.leaveRequests.filter(r => r.status === 'Pending'); },
+
+                // DELETE SHIFT HANDLER FOR MANAGERS
+                deleteShift(shiftId) {
+                    if(confirm("Are you sure you want to completely remove this shift?")) {
+                        this.shifts = this.shifts.filter(s => s.id !== shiftId);
+                        this.saveShifts();
+                    }
+                },
+
+                // MATHEMATICAL ENGINE TO AUTO-EXTRACT HOURS OUT OF TEXT
+                calculateWeeklyHours(empName) {
+                    let totalHours = 0;
+                    const days = this.weekDays;
+                    
+                    // Filter shifts strictly tied to this employee, location, and the visible 7 days
+                    const activeShifts = this.shifts.filter(s => 
+                        s.employeeName === empName && 
+                        s.location === this.currentLocation &&
+                        days.some(d => d.dateStr === s.date)
+                    );
+
+                    activeShifts.forEach(shift => {
+                        let timeStr = shift.time.toLowerCase().replace(/\s+/g, '');
+                        
+                        // Ignore leave tags
+                        if (shift.role.includes('❌') || timeStr === 'off' || timeStr === 'unavailable') return;
+
+                        // Case A: Simple raw numeric values like "8" or "7.5"
+                        if (!isNaN(timeStr) && timeStr !== '') {
+                            totalHours += parseFloat(timeStr);
+                            return;
+                        }
+
+                        // Case B: Time range extraction (e.g., "8am-4pm")
+                        if (timeStr.includes('-') || timeStr.includes('to')) {
+                            const parts = timeStr.split(/-|to/);
+                            if (parts.length === 2) {
+                                let start = this.parseTimeValue(parts[0]);
+                                let end = this.parseTimeValue(parts[1]);
+                                if (start !== null && end !== null) {
+                                    let diff = end - start;
+                                    if (diff < 0) diff += 24; // Handle overnight shifts cleanly
+                                    totalHours += diff;
+                                }
+                            }
+                        }
+                    });
+
+                    return totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1);
+                },
+
+                parseTimeValue(str) {
+                    // Extract match coordinates out of standard clock strings
+                    const match = str.match(/^(\d+)(?::(\d+))?(am|pm)?$/);
+                    if (!match) return null;
+
+                    let hours = parseInt(match[1]);
+                    let minutes = match[2] ? parseInt(match[2]) : 0;
+                    let ampm = match[3];
+
+                    if (ampm === 'pm' && hours < 12) hours += 12;
+                    if (ampm === 'am' && hours === 12) hours = 0;
+
+                    return hours + (minutes / 60);
+                },
 
                 submitLeaveRequest() {
                     if (!this.selectedEmployeeForRequest || !this.newRequestDate) return alert('Fill required parameters.');
